@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🎄 Operation: Heiligabend V16 (Final & Fast) 🎁</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Fredoka+One&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
+    
+    <script src="https://r.wortal.net/sdk/wortal.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #eef2f7;
+            --card-bg: #ffffff;
+            --red: #c0392b; --dark-red: #922b21;
+            --green: #27ae60; --dark-green: #1e8449;
+            --gold: #f1c40f; --purple: #8e44ad;
+            --shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        body {
+            font-family: 'Open Sans', sans-serif;
+            background-color: var(--bg-color);
+            background-image: radial-gradient(#fff 20%, transparent 20%), radial-gradient(#fff 20%, transparent 20%);
+            background-position: 0 0, 50px 50px; background-size: 100px 100px;
+            color: #2c3e50; text-align: center; margin: 0; padding: 0 0 80px 0;
+            overscroll-behavior-y: contain; user-select: none;
+            -webkit-tap-highlight-color: transparent; /* Entfernt grauen Klick-Hintergrund auf Mobile */
+        }
+
+        #game-container { max-width: 600px; margin: 0 auto; padding: 15px; }
+
+        h1 { font-family: 'Mountains of Christmas', cursive; color: var(--dark-red); font-size: 2.5em; margin: 10px 0; text-shadow: 2px 2px 0 #fff; }
+        h2 { font-family: 'Fredoka One', cursive; text-align: left; border-left: 5px solid var(--red); padding-left: 10px; margin-top: 25px; }
+        h3 { font-family: 'Fredoka One', cursive; margin-bottom: 5px; }
+
+        /* --- UI COMPONENTS --- */
+        .section { background: var(--card-bg); border-radius: 16px; padding: 15px; margin-top: 15px; box-shadow: var(--shadow); border: 2px solid #e0e0e0; position: relative; }
+        
+        #top-stats {
+            background: linear-gradient(135deg, var(--dark-green), var(--green)); color: white;
+            padding: 10px; border-radius: 16px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(39,174,96,0.4);
+            display: grid; grid-template-columns: 1fr 1fr; gap: 8px; border: 3px solid #fff;
+        }
+        .stat-item { background: rgba(0,0,0,0.2); padding: 5px 10px; border-radius: 8px; font-family: 'Fredoka One', cursive; font-size: 0.9em; display: flex; align-items: center; justify-content: center; }
+        
+        /* --- BUTTONS --- */
+        button {
+            font-family: 'Fredoka One', cursive; border: none; border-radius: 12px; padding: 12px; 
+            cursor: pointer; transition: transform 0.1s; width: 100%; font-size: 1em; margin-top: 5px;
+            position: relative; top: 0; touch-action: manipulation; outline: none;
+        }
+        button:active:not(:disabled) { transform: scale(0.98); box-shadow: none !important; }
+        button:disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; box-shadow: none !important; transform: none; }
+
+        /* OPTIMIERTER KLICK-BUTTON */
+        #clickButton {
+            background: linear-gradient(to bottom, #FFD700, #FFA500); color: #d35400;
+            font-size: 1.8em; padding: 20px; 
+            border: 4px solid #e67e22; /* Fester Rahmen */
+            border-radius: 20px;
+            margin-bottom: 10px; 
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+            transition: transform 0.05s cubic-bezier(0.5, 0, 0.5, 1); /* Sehr schnell */
+        }
+        #clickButton:active { 
+            transform: scale(0.96); /* Nur Skalierung, kein Layout-Shift */
+            background: linear-gradient(to bottom, #e6c200, #e69500);
+        }
+
+        .buyButton, .upgradeButton { background: linear-gradient(#3498db, #2980b9); color: white; box-shadow: 0 4px 0 #1a5276; }
+        .stripe-button { background: #635bff; color: white; box-shadow: 0 4px 0 #4a44be; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .stripe-button-gold { background: #8e44ad; color: white; box-shadow: 0 4px 0 #6c3483; display: flex; justify-content: center; align-items: center; gap: 10px; }
+        .stripe-button-premium { background: linear-gradient(to bottom, #f1c40f, #f39c12); box-shadow: 0 4px 0 #d35400; color: #8B4513; display: flex; justify-content: center; align-items: center; gap: 10px;}
+
+        /* --- SHOPS --- */
+        .shop-grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+        @media(min-width: 400px) { .shop-grid { grid-template-columns: 1fr 1fr; } }
+
+        .card { background: #fff; border: 2px solid #eee; border-radius: 12px; padding: 10px; text-align: left; display: flex; flex-direction: column; }
+        .card.affordable { border-color: var(--green); }
+        .card-header { display: flex; align-items: center; margin-bottom: 8px; }
+        .card-icon { font-size: 2em; background: #f4f4f4; width: 50px; height: 50px; display: flex; align-items: center; justify-content: center; border-radius: 10px; margin-right: 10px; }
+        .card-stats { background: #f9f9f9; padding: 5px; border-radius: 6px; font-size: 0.85em; margin-bottom: 5px; }
+        
+        /* --- NAVIGATION --- */
+        #nav-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; height: 65px; background: #fff;
+            display: flex; justify-content: space-around; align-items: center;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1); z-index: 100;
+            border-radius: 20px 20px 0 0;
+        }
+        .nav-btn { background: none; border: none; color: #95a5a6; font-size: 0.7em; display: flex; flex-direction: column; align-items: center; padding: 5px; margin: 0; }
+        .nav-btn span { font-size: 1.8em; margin-bottom: 2px; }
+        .nav-btn.active { color: var(--red); transform: scale(1.1); }
+
+        .menu-content { display: none; animation: fadeUp 0.3s; }
+        .menu-content.active { display: block; }
+        @keyframes fadeUp { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
+
+        .badge { background: var(--red); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7em; position: absolute; top: -10px; right: 10px; transform: rotate(5deg); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <h1>Operation: Heiligabend</h1>
+
+    <div id="top-stats">
+        <div class="stat-item">🎁 <span id="geschenke-display">0</span></div>
+        <div class="stat-item">⚙️ <span id="gps-display">0</span>/s</div>
+        <div class="stat-item">👻 <span id="prestige-display">0</span></div>
+        <div class="stat-item">⭐ <span id="glanzsterne-display">0</span></div>
+    </div>
+
+    <div id="menu-werkstatt" class="menu-content active">
+        <div class="section" style="background:#eafaf1; border-color:#a9dfbf;">
+            <select id="world-select" onchange="switchWorld(this.value)" style="width:100%; padding:8px; border-radius:8px; border:1px solid var(--green); font-family:'Fredoka One';" disabled></select>
+            <div style="font-size:0.8em; color:var(--dark-green); margin-top:5px;" id="world-unlock-info"></div>
+        </div>
+
+        <div class="section" style="border:none; background:transparent; box-shadow:none; padding:0;">
+            <button id="clickButton" onpointerdown="clickAction(event)">GESCHENK PACKEN!</button>
+            <div style="font-weight:bold; color:var(--green);">Produktion: <span id="gps-info">0.0</span> 🎁/sek</div>
+        </div>
+
+        <h2>Automatisierung</h2>
+        <div id="building-shop-grid" class="shop-grid"></div>
+
+        <h2>Neujahr</h2>
+        <div class="section" style="background:#fef5e7; border-color:#f5b041;">
+            <p style="margin:0 0 10px 0;">Gesamt produziert: <span id="total-geschenke">0</span> 🎁</p>
+            <button onclick="doPrestige()" id="prestigeButton" style="background:#9b59b6; color:white; box-shadow:0 4px 0 #8e44ad;">RESET (0 👻)</button>
+        </div>
+    </div>
+
+    <div id="menu-upgrades" class="menu-content">
+        <h2>Einmalige Upgrades</h2>
+        <div id="upgrades-shop-grid" class="shop-grid"></div>
+    </div>
+
+    <div id="menu-boosts" class="menu-content">
+        <h2>Boosts & Optionen</h2>
+        <div class="section">
+            <h3>🚀 Booster</h3>
+            <div style="margin-bottom:15px;">
+                <div id="adBoostInfo" style="color:var(--green); font-weight:bold;"></div>
+                <button id="adBoostButton" onclick="activateAdBoost()" style="background:#27ae60; color:white; box-shadow:0 4px 0 #1e8449;">📺 Werbung (2x GpS, 30 Min)</button>
+            </div>
+            <div>
+                <div id="glanzsternBoostInfo" style="color:var(--gold); font-weight:bold; text-shadow:0 0 1px black;"></div>
+                <button id="glanzsternBoostButton" onclick="activateGlanzsternBoost()" style="background:var(--gold); color:#8B4513; box-shadow:0 4px 0 #d4ac0d;">✨ Zeitsprung (5x GpS, 5 Min)</button>
+            </div>
+        </div>
+        <div class="section">
+            <h3>💾 Spielstand</h3>
+            <div style="display:flex; gap:10px;">
+                <button onclick="saveGame(true)" style="background:#34495e; color:white; box-shadow:0 4px 0 #2c3e50;">Speichern</button>
+                <button onclick="resetGamePrompt()" style="background:#c0392b; color:white; box-shadow:0 4px 0 #922b21;">Löschen</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="menu-shop" class="menu-content">
+        <h2>⭐ Glanzsterne Shop</h2>
+        <div class="section" style="background:#f4ecf7; border-color:#d7bde2;">
+            <p style="margin:0;">Permanente Boni (bleiben nach Reset).</p>
+            <strong>Habe: <span id="ghosts-available">0</span> 👻 | <span id="stars-available-shop">0</span> ⭐</strong>
+        </div>
+        <div id="glanzsterne-shop-grid" class="shop-grid"></div>
+
+        <h2 style="margin-top:30px;">💎 Premium Kaufen</h2>
+        
+        <div class="section" style="border-color:#635bff;">
+            <h3>Kleiner Sack (100 ⭐)</h3>
+            <p style="font-size:0.9em; margin-bottom:10px;">Perfekt für den schnellen Start.</p>
+            <button onclick="buyRealStars(100)" class="stripe-button">
+                <span>Kaufen für 1,99 €</span>
+            </button>
+        </div>
+
+        <div class="section" style="border-color:#8e44ad;">
+            <div class="badge">BELIEBT</div>
+            <h3>Rentier-Spezial (200 ⭐)</h3>
+            <p style="font-size:0.9em; margin-bottom:10px;">Doppelte Menge, besserer Preis!</p>
+            <button onclick="buyRealStars(200)" class="stripe-button-gold">
+                <span>Kaufen für 3,49 €</span>
+            </button>
+        </div>
+
+        <div class="section" style="border-color: #f1c40f; border-width: 3px; transform: scale(1.04); margin-top: 25px; z-index: 5;">
+            <div class="badge" style="background: #e74c3c; top:-15px; right:-10px; transform:rotate(5deg); box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-size:0.9em;">🔥 BEST VALUE</div>
+            <h3 style="color: #d35400; font-size: 1.3em; text-transform: uppercase;">Die Schatzkammer (500 ⭐)</h3>
+            <p style="font-size:0.9em; color:#555;">Heiliger Strohsack! Der Jackpot aus Santas Tresor.</p>
+            <button onclick="buyRealStars(500)" class="stripe-button-premium" style="padding: 15px;">
+                <span style="font-size:1.1em;">💎 Kaufen für 7,49 €</span>
+            </button>
+            <p style="font-size: 0.8em; color: #27ae60; margin-top: 8px; font-weight: bold;">Bester Preis pro Stern!</p>
+        </div>
+        
+        <p style="font-size:0.8em; color:#999; margin-top:20px;">Zahlungsabwicklung sicher über Stripe.</p>
+    </div>
+</div>
+
+<div id="nav-bar">
+    <button class="nav-btn active" onclick="showMenu('werkstatt', this)"><span>🎁</span>Werkstatt</button>
+    <button class="nav-btn" onclick="showMenu('upgrades', this)"><span>✨</span>Upgrades</button>
+    <button class="nav-btn" onclick="showMenu('boosts', this)"><span>⚡</span>Boosts</button>
+    <button class="nav-btn" onclick="showMenu('shop', this)"><span>⭐</span>Shop</button>
+</div>
+
+<script>
+/* --- KONFIGURATION --- */
+const STRIPE_LINKS = {
+    100: "https://buy.stripe.com/cNi6oJbo17ryaIS9zMeZ201", 
+    200: "https://buy.stripe.com/dRm9AV3Vz6nu9EO27keZ202",
+    300: "https://buy.stripe.com/eVq6oJ4ZD13ag3c3boeZ203",
+    500: "https://buy.stripe.com/7sYeVfeAd3big3cbHUeZ200"
+};
+
+/* --- GAME STATE --- */
+let game = {
+    geschenke: 0, totalGeschenkeEver: 0, prestigePoints: 0, glanzsterne: 0, gps: 0, clickPower: 1,
+    currentWorld: 'nordpol', glanzsterneGpsMultiplier: 1,
+    adBoostActive: false, adBoostEndTime: 0, adBoostMultiplier: 2,
+    glanzsternBoostActive: false, glanzsternBoostEndTime: 0, glanzsternBoostMultiplier: 5, glanzsternBoostCost: 5,
+    buildings: {
+        // FIX: Initial GPS auf 0 gesetzt
+        wichtel: { name: "Wichtel", cost: 15, count: 0, icon: "🧑‍🎄", baseGps: 0.5, gpsGrowthRate: 1.07, gps: 0 },
+        maschine: { name: "Maschine", cost: 100, count: 0, icon: "⚙️", baseGps: 4, gpsGrowthRate: 1.07, gps: 0 },
+        rentier: { name: "Rentier", cost: 1100, count: 0, icon: "🦌", baseGps: 12, gpsGrowthRate: 1.07, gps: 0 },
+        fabrik: { name: "Fabrik", cost: 12000, count: 0, icon: "🏭", baseGps: 45, gpsGrowthRate: 1.07, gps: 0 },
+        zeppelin: { name: "Zeppelin", cost: 150000, count: 0, icon: "🎈", baseGps: 400, gpsGrowthRate: 1.07, gps: 0 },
+        portal: { name: "Portal", cost: 2000000, count: 0, icon: "🌌", baseGps: 6000, gpsGrowthRate: 1.07, gps: 0 }
+    },
+    availableUpgrades: {
+        keks: { name: "Koffein-Keks", cost: 500, target: "wichtel", effect: 2, purchased: false, icon: "🍪" },
+        schere: { name: "Laser-Schere", cost: 10000, target: "maschine", effect: 5, purchased: false, icon: "✂️" },
+        hufe: { name: "Turbo-Hufe", cost: 150000, target: "rentier", effect: 5, purchased: false, icon: "💨" },
+        fuel: { name: "Bio-Sprit", cost: 250000, target: "zeppelin", effect: 5, purchased: false, icon: "⛽" },
+        magnet: { name: "Magnet", cost: 10000000, target: "all", effect: 2, purchased: false, icon: "🧲" }
+    },
+    glanzsterneUpgrades: {
+        click: { name: "Sternen-Klick", cost: 5, effect: 2, target: "click", purchased: false, icon: "🖱️" },
+        global: { name: "Ewiger Glanz", cost: 10, effect: 1.10, target: "gps_mult", purchased: false, icon: "✨" },
+        wichtel: { name: "Wichtel-Meister", cost: 3, effect: 2, target: "wichtel", purchased: false, icon: "👑" }
+    },
+    worlds: {
+        nordpol: { name: "Nordpol", unlockGeschenke: 0, unlocked: true, icon: "❄️" },
+        elfenwald: { name: "Elfenwald", unlockGeschenke: 500000, unlocked: false, icon: "🌳" },
+        weltraum: { name: "Weltraum", unlockGeschenke: 50000000, unlocked: false, icon: "🚀" }
+    }
+};
+
+/* --- LOGIK --- */
+function init() {
+    window.addEventListener('load', () => {
+        if (window.Wortal) Wortal.init().then(() => console.log("Wortal Ready")).catch(e => console.error(e));
+    });
+
+    loadGame();
+    checkPayment();
+    createShopUI();
+    populateWorlds();
+    recalculateGps();
+    updateUI();
+    
+    setInterval(() => {
+        let generated = game.gps / 10;
+        game.geschenke += generated;
+        game.totalGeschenkeEver += generated;
+        
+        let now = Date.now();
+        if (game.adBoostActive && now > game.adBoostEndTime) { game.adBoostActive = false; recalculateGps(); }
+        if (game.glanzsternBoostActive && now > game.glanzsternBoostEndTime) { game.glanzsternBoostActive = false; recalculateGps(); }
+        
+        checkUnlocks();
+        updateUI();
+    }, 100);
+
+    setInterval(() => saveGame(false), 30000);
+}
+
+/* --- PAYMENT & ADS --- */
+function buyRealStars(amount) {
+    let link = STRIPE_LINKS[amount];
+    if (link) window.location.href = link;
+    else alert("Fehler: Kein Link konfiguriert!");
+}
+
+function checkPayment() {
+    const params = new URLSearchParams(window.location.search);
+    const success = params.get('payment_success');
+    if (success) {
+        const amount = parseInt(success);
+        if (!isNaN(amount)) {
+            setTimeout(() => {
+                game.glanzsterne += amount;
+                alert(`DANKE! ${amount} Glanzsterne erhalten!`);
+                saveGame(true);
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }, 500);
+        }
+    }
+}
+
+function activateAdBoost() {
+    if (window.Wortal) {
+        Wortal.ads.showRewarded('Rentier-Turbo', 
+            () => {},
+            () => { grantAdReward(); },
+            () => { alert("Keine Werbung verfügbar."); }
+        );
+    } else {
+        if(confirm("Simuliere Werbung... (Ok klicken)")) grantAdReward();
+    }
+}
+
+function grantAdReward() {
+    game.adBoostEndTime = Date.now() + (30*60*1000);
+    game.adBoostActive = true; recalculateGps(); updateUI();
+    alert("Rentier-Turbo aktiviert!");
+}
+
+/* --- CORE --- */
+function saveGame(notify) {
+    let save = { ...game, lastSave: Date.now(), buildings:{}, upgrades:{}, glanz_ups:{}, worlds: game.worlds };
+    for(let k in game.buildings) save.buildings[k] = game.buildings[k].count;
+    for(let k in game.availableUpgrades) save.upgrades[k] = game.availableUpgrades[k].purchased;
+    for(let k in game.glanzsterneUpgrades) save.glanz_ups[k] = game.glanzsterneUpgrades[k].purchased;
+    localStorage.setItem('xmasClickerV16', JSON.stringify(save));
+    if(notify) alert("Gespeichert!");
+}
+
+function loadGame() {
+    let data = localStorage.getItem('xmasClickerV16');
+    if(!data) return;
+    let s = JSON.parse(data);
+    
+    game.geschenke = s.geschenke || 0; game.totalGeschenkeEver = s.totalGeschenkeEver || 0;
+    game.prestigePoints = s.prestigePoints || 0; game.glanzsterne = s.glanzsterne || 0;
+    game.currentWorld = s.currentWorld || 'nordpol';
+    
+    if(s.buildings) for(let k in s.buildings) {
+        if(game.buildings[k]) {
+            game.buildings[k].count = s.buildings[k];
+            game.buildings[k].gps = game.buildings[k].count > 0 ? game.buildings[k].baseGps * (game.buildings[k].gpsGrowthRate ** game.buildings[k].count) : 0;
+        }
+    }
+    if(s.upgrades) for(let k in s.upgrades) if(game.availableUpgrades[k]) game.availableUpgrades[k].purchased = s.upgrades[k];
+    if(s.glanz_ups) for(let k in s.glanz_ups) if(game.glanzsterneUpgrades[k]) {
+        game.glanzsterneUpgrades[k].purchased = s.glanz_ups[k];
+        applyGlanzEffect(k);
+    }
+    if(s.worlds) for(let k in s.worlds) if(game.worlds[k]) game.worlds[k].unlocked = s.worlds[k].unlocked;
+
+    let now = Date.now();
+    if(s.adBoostActive && s.adBoostEndTime > now) { game.adBoostActive = true; game.adBoostEndTime = s.adBoostEndTime; }
+    if(s.glanzsternBoostActive && s.glanzsternBoostEndTime > now) { game.glanzsternBoostActive = true; game.glanzsternBoostEndTime = s.glanzsternBoostEndTime; }
+
+    if(s.lastSave) {
+        recalculateGps();
+        let seconds = (now - s.lastSave) / 1000;
+        if(seconds > 60) {
+            let earned = Math.min(seconds, 36000) * game.gps; 
+            game.geschenke += earned; game.totalGeschenkeEver += earned;
+            alert(`Willkommen zurück! Offline verdient: ${Math.floor(earned).toLocaleString()} 🎁`);
+        }
+    }
+}
+
+function resetGamePrompt() {
+    if(confirm("Wirklich alles löschen?")) {
+        localStorage.removeItem('xmasClickerV16'); location.reload();
+    }
+}
+
+function calculateCost(key) {
+    return Math.floor(game.buildings[key].cost * (1.15 ** game.buildings[key].count));
+}
+
+function recalculateGps() {
+    let rawGps = 0;
+    let prestigeMult = 1 + (game.prestigePoints * 0.05);
+    let boostMult = (game.adBoostActive ? 2 : 1) * (game.glanzsternBoostActive ? 5 : 1);
+    
+    for(let k in game.buildings) {
+        let b = game.buildings[k];
+        let upMult = 1;
+        for(let u in game.availableUpgrades) {
+            let up = game.availableUpgrades[u];
+            if(up.purchased && (up.target === k || up.target === 'all')) upMult *= up.effect;
+        }
+        for(let u in game.glanzsterneUpgrades) {
+            let up = game.glanzsterneUpgrades[u];
+            if(up.purchased && up.target === k) upMult *= up.effect;
+        }
+        rawGps += b.gps * upMult;
+    }
+    game.gps = rawGps * prestigeMult * game.glanzsterneGpsMultiplier * boostMult;
+}
+
+function clickAction(e) {
+    // Verhindert Standardverhalten und Bubbling
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    let mult = 1;
+    for(let u in game.availableUpgrades) if(game.availableUpgrades[u].purchased && game.availableUpgrades[u].target === 'click') mult *= game.availableUpgrades[u].effect;
+    let prestigeMult = 1 + (game.prestigePoints * 0.05);
+    let produced = game.clickPower * mult * prestigeMult;
+    
+    game.geschenke += produced; 
+    game.totalGeschenkeEver += produced;
+    
+    // Vibration Feedback
+    if(navigator.vibrate) navigator.vibrate(5);
+    
+    updateUI();
+}
+
+/* --- AKTIONEN --- */
+function buyBuilding(k) {
+    let cost = calculateCost(k);
+    if(game.geschenke >= cost) {
+        game.geschenke -= cost;
+        game.buildings[k].count++;
+        game.buildings[k].gps = game.buildings[k].baseGps * (game.buildings[k].gpsGrowthRate ** game.buildings[k].count);
+        recalculateGps(); updateUI();
+    }
+}
+
+function buyUpgrade(k) {
+    let u = game.availableUpgrades[k];
+    if(!u.purchased && game.geschenke >= u.cost) {
+        game.geschenke -= u.cost; u.purchased = true;
+        recalculateGps(); updateUI();
+    }
+}
+
+function buyGlanzUpgrade(k) {
+    let u = game.glanzsterneUpgrades[k];
+    if(!u.purchased && game.prestigePoints >= u.cost) {
+        game.prestigePoints -= u.cost; u.purchased = true;
+        applyGlanzEffect(k);
+        recalculateGps(); updateUI(); createShopUI();
+    }
+}
+
+function applyGlanzEffect(k) {
+    let u = game.glanzsterneUpgrades[k];
+    if(u.target === 'click') game.clickPower *= u.effect;
+    else if(u.target === 'gps_mult') game.glanzsterneGpsMultiplier *= u.effect;
+}
+
+function activateGlanzsternBoost() {
+    if(game.glanzsterne >= 5) {
+        game.glanzsterne -= 5;
+        game.glanzsternBoostActive = true; game.glanzsternBoostEndTime = Date.now() + (5*60*1000);
+        recalculateGps(); updateUI();
+    } else alert("Zu wenig Sterne!");
+}
+
+function doPrestige() {
+    let p = Math.floor(game.totalGeschenkeEver / 10000000);
+    if(p > 0 && confirm(`Reset für ${p} Geister?`)) {
+        game.prestigePoints += p;
+        game.geschenke = 0; game.gps = 0;
+        game.adBoostActive = false; game.glanzsternBoostActive = false;
+        for(let k in game.buildings) { game.buildings[k].count = 0; game.buildings[k].gps = 0; }
+        for(let k in game.availableUpgrades) game.availableUpgrades[k].purchased = false;
+        recalculateGps(); createShopUI(); updateUI(); saveGame();
+    }
+}
+
+function switchWorld(k) { if(game.worlds[k].unlocked) { game.currentWorld = k; updateUI(); } }
+
+function checkUnlocks() {
+    for(let k in game.worlds) if(!game.worlds[k].unlocked && game.totalGeschenkeEver >= game.worlds[k].unlockGeschenke) {
+        game.worlds[k].unlocked = true; populateWorlds();
+    }
+}
+
+/* --- UI BUILDER --- */
+function createShopUI() {
+    let bg = document.getElementById('building-shop-grid'); bg.innerHTML = '';
+    for(let k in game.buildings) {
+        bg.innerHTML += `
+        <div class="card" id="card-${k}">
+            <div class="card-header"><div class="card-icon">${game.buildings[k].icon}</div><div><div class="title">${game.buildings[k].name}</div><div style="color:var(--red); font-weight:bold;" class="count">0</div></div></div>
+            <div class="card-stats">Preis: <span class="cost">0</span><br>Ertrag: <span class="gps-stat">0</span></div>
+            <button class="buyButton" id="btn-${k}" onclick="buyBuilding('${k}')">KAUFEN</button>
+        </div>`;
+    }
+    let ug = document.getElementById('upgrades-shop-grid'); ug.innerHTML = '';
+    for(let k in game.availableUpgrades) {
+        let u = game.availableUpgrades[k];
+        ug.innerHTML += `
+        <div class="card" id="up-card-${k}">
+            <div class="card-header"><div class="card-icon">${u.icon}</div><div class="title">${u.name}</div></div>
+            <div class="card-stats">Preis: <span class="cost">${u.cost.toLocaleString()}</span><br>Effekt: x${u.effect}</div>
+            <button class="upgradeButton" id="up-btn-${k}" onclick="buyUpgrade('${k}')">KAUFEN</button>
+        </div>`;
+    }
+    let gg = document.getElementById('glanzsterne-shop-grid'); gg.innerHTML = '';
+    for(let k in game.glanzsterneUpgrades) {
+        let u = game.glanzsterneUpgrades[k];
+        if(!u.purchased) {
+            gg.innerHTML += `
+            <div class="card">
+                <div class="card-header"><div class="card-icon" style="background:#f4ecf7;">${u.icon}</div><div class="title">${u.name}</div></div>
+                <div class="card-stats" style="color:#8e44ad;">Preis: ${u.cost} 👻<br>Effekt: x${u.effect} (Permanent)</div>
+                <button class="upgradeButton" style="background:#9b59b6; box-shadow:0 4px 0 #8e44ad;" id="glanz-btn-${k}" onclick="buyGlanzUpgrade('${k}')">KAUFEN</button>
+            </div>`;
+        }
+    }
+}
+
+function populateWorlds() {
+    let s = document.getElementById('world-select'); s.innerHTML = '';
+    for(let k in game.worlds) if(game.worlds[k].unlocked) s.add(new Option(game.worlds[k].icon + " " + game.worlds[k].name, k));
+    s.value = game.currentWorld;
+    s.disabled = s.options.length < 2;
+}
+
+function showMenu(id, btn) {
+    document.querySelectorAll('.menu-content').forEach(e => e.classList.remove('active'));
+    document.getElementById('menu-'+id).classList.add('active');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+}
+
+function updateUI() {
+    document.getElementById('geschenke-display').innerText = Math.floor(game.geschenke).toLocaleString();
+    document.getElementById('gps-display').innerText = game.gps.toFixed(1);
+    document.getElementById('prestige-display').innerText = game.prestigePoints.toLocaleString();
+    document.getElementById('glanzsterne-display').innerText = game.glanzsterne.toLocaleString();
+    
+    document.getElementById('gps-info').innerText = game.gps.toFixed(1);
+    document.getElementById('total-geschenke').innerText = Math.floor(game.totalGeschenkeEver).toLocaleString();
+    document.getElementById('ghosts-available').innerText = game.prestigePoints.toLocaleString();
+    document.getElementById('stars-available-shop').innerText = game.glanzsterne.toLocaleString();
+
+    const prestigeBonus = 1 + (game.prestigePoints * 0.05);
+    const boosts = game.glanzsterneGpsMultiplier * (game.adBoostActive ? 2 : 1) * (game.glanzsternBoostActive ? 5 : 1);
+    
+    for(let k in game.buildings) {
+        let b = game.buildings[k];
+        let cost = calculateCost(k);
+        let card = document.getElementById('card-'+k);
+        let btn = document.getElementById('btn-'+k);
+        
+        if(card && btn) {
+            card.querySelector('.count').innerText = b.count;
+            card.querySelector('.cost').innerText = cost.toLocaleString() + " 🎁";
+            
+            let upMult = 1; for(let u in game.availableUpgrades) if(game.availableUpgrades[u].purchased && (game.availableUpgrades[u].target===k || game.availableUpgrades[u].target==='all')) upMult *= game.availableUpgrades[u].effect;
+            for(let u in game.glanzsterneUpgrades) if(game.glanzsterneUpgrades[u].purchased && game.glanzsterneUpgrades[u].target === k) upMult *= game.glanzsterneUpgrades[u].effect;
+            
+            const currentTotalGps = b.gps * upMult * prestigeBonus * boosts;
+            card.querySelector('.gps-stat').innerText = `${currentTotalGps.toFixed(1)}/s`;
+            
+            btn.disabled = game.geschenke < cost;
+            if(game.geschenke >= cost) card.classList.add('affordable'); else card.classList.remove('affordable');
+        }
+    }
+
+    for(let k in game.availableUpgrades) {
+        let u = game.availableUpgrades[k];
+        let card = document.getElementById('up-card-'+k);
+        if(u.purchased) { if(card) card.style.display='none'; }
+        else if(card) {
+            let btn = document.getElementById('up-btn-'+k);
+            btn.disabled = game.geschenke < u.cost;
+            if(game.geschenke >= u.cost) card.classList.add('affordable'); else card.classList.remove('affordable');
+        }
+    }
+    for(let k in game.glanzsterneUpgrades) {
+        let u = game.glanzsterneUpgrades[k];
+        let btn = document.getElementById('glanz-btn-'+k);
+        if(btn) btn.disabled = game.prestigePoints < u.cost;
+    }
+
+    let p = Math.floor(game.totalGeschenkeEver / 10000000);
+    let pb = document.getElementById('prestigeButton');
+    if(p > 0) { pb.disabled=false; pb.innerText = `RESET: +${p.toLocaleString()} 👻`; }
+    else { pb.disabled=true; pb.innerText = `Benötigt 10 Mio. Gesamt`; }
+
+    if(game.adBoostActive) {
+        let m = Math.ceil((game.adBoostEndTime - Date.now())/60000);
+        document.getElementById('adBoostInfo').innerText = `🔥 Aktiv (${m}m)`;
+        document.getElementById('adBoostButton').disabled = true;
+    } else {
+        document.getElementById('adBoostInfo').innerText = "";
+        document.getElementById('adBoostButton').disabled = false;
+    }
+    if(game.glanzsternBoostActive) {
+        let m = Math.ceil((game.glanzsternBoostEndTime - Date.now())/60000);
+        document.getElementById('glanzsternBoostInfo').innerText = `✨ Aktiv (${m}m)`;
+        document.getElementById('glanzsternBoostButton').disabled = true;
+    } else {
+        document.getElementById('glanzsternBoostInfo').innerText = "";
+        document.getElementById('glanzsternBoostButton').disabled = game.glanzsterne < 5;
+    }
+
+    let wKeys = Object.keys(game.worlds); let currIdx = wKeys.indexOf(game.currentWorld);
+    let nextW = wKeys[currIdx+1] ? game.worlds[wKeys[currIdx+1]] : null;
+    if(nextW) {
+        let req = nextW.unlockGeschenke - game.totalGeschenkeEver;
+        document.getElementById('world-unlock-info').innerText = req > 0 ? `Nächste Welt in: ${Math.floor(req).toLocaleString()} 🎁` : "Neue Welt verfügbar!";
+    } else document.getElementById('world-unlock-info').innerText = "";
+}
+
+init();
+</script>
+</body>
+</html>
