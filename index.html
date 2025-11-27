@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>🎄 Operation: Heiligabend V15 (Final) 🎁</title>
+    <title>🎄 Operation: Heiligabend V16 (Final & Fast) 🎁</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Mountains+of+Christmas:wght@700&family=Fredoka+One&family=Open+Sans:wght@400;700&display=swap" rel="stylesheet">
     
@@ -26,7 +26,7 @@
             background-position: 0 0, 50px 50px; background-size: 100px 100px;
             color: #2c3e50; text-align: center; margin: 0; padding: 0 0 80px 0;
             overscroll-behavior-y: contain; user-select: none;
-            -webkit-tap-highlight-color: transparent;
+            -webkit-tap-highlight-color: transparent; /* Entfernt grauen Klick-Hintergrund auf Mobile */
         }
 
         #game-container { max-width: 600px; margin: 0 auto; padding: 15px; }
@@ -51,15 +51,24 @@
             cursor: pointer; transition: transform 0.1s; width: 100%; font-size: 1em; margin-top: 5px;
             position: relative; top: 0; touch-action: manipulation; outline: none;
         }
-        button:active:not(:disabled) { top: 3px; box-shadow: none !important; }
-        button:disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; box-shadow: none !important; top: 3px; }
+        button:active:not(:disabled) { transform: scale(0.98); box-shadow: none !important; }
+        button:disabled { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; box-shadow: none !important; transform: none; }
 
+        /* OPTIMIERTER KLICK-BUTTON */
         #clickButton {
             background: linear-gradient(to bottom, #FFD700, #FFA500); color: #d35400;
-            font-size: 1.8em; padding: 20px; border-bottom: 6px solid #e67e22;
-            margin-bottom: 10px; text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+            font-size: 1.8em; padding: 20px; 
+            border: 4px solid #e67e22; /* Fester Rahmen */
+            border-radius: 20px;
+            margin-bottom: 10px; 
+            text-shadow: 1px 1px 0 rgba(255,255,255,0.5);
+            box-shadow: 0 6px 10px rgba(0,0,0,0.15);
+            transition: transform 0.05s cubic-bezier(0.5, 0, 0.5, 1); /* Sehr schnell */
         }
-        #clickButton:active { border-bottom: 0; margin-top: 6px; }
+        #clickButton:active { 
+            transform: scale(0.96); /* Nur Skalierung, kein Layout-Shift */
+            background: linear-gradient(to bottom, #e6c200, #e69500);
+        }
 
         .buyButton, .upgradeButton { background: linear-gradient(#3498db, #2980b9); color: white; box-shadow: 0 4px 0 #1a5276; }
         .stripe-button { background: #635bff; color: white; box-shadow: 0 4px 0 #4a44be; display: flex; justify-content: center; align-items: center; gap: 10px; }
@@ -113,7 +122,7 @@
         </div>
 
         <div class="section" style="border:none; background:transparent; box-shadow:none; padding:0;">
-            <button id="clickButton" onclick="clickAction(event)">GESCHENK PACKEN!</button>
+            <button id="clickButton" onpointerdown="clickAction(event)">GESCHENK PACKEN!</button>
             <div style="font-weight:bold; color:var(--green);">Produktion: <span id="gps-info">0.0</span> 🎁/sek</div>
         </div>
 
@@ -184,7 +193,7 @@
         <div class="section" style="border-color: #f1c40f; border-width: 3px; transform: scale(1.04); margin-top: 25px; z-index: 5;">
             <div class="badge" style="background: #e74c3c; top:-15px; right:-10px; transform:rotate(5deg); box-shadow: 0 3px 6px rgba(0,0,0,0.3); font-size:0.9em;">🔥 BEST VALUE</div>
             <h3 style="color: #d35400; font-size: 1.3em; text-transform: uppercase;">Die Schatzkammer (500 ⭐)</h3>
-            <p style="font-size:0.9em; color:#555;">Der Jackpot aus Santas Tresor.</p>
+            <p style="font-size:0.9em; color:#555;">Heiliger Strohsack! Der Jackpot aus Santas Tresor.</p>
             <button onclick="buyRealStars(500)" class="stripe-button-premium" style="padding: 15px;">
                 <span style="font-size:1.1em;">💎 Kaufen für 7,49 €</span>
             </button>
@@ -207,6 +216,7 @@
 const STRIPE_LINKS = {
     100: "https://buy.stripe.com/cNi6oJbo17ryaIS9zMeZ201", 
     200: "https://buy.stripe.com/dRm9AV3Vz6nu9EO27keZ202",
+    300: "https://buy.stripe.com/eVq6oJ4ZD13ag3c3boeZ203",
     500: "https://buy.stripe.com/7sYeVfeAd3big3cbHUeZ200"
 };
 
@@ -217,6 +227,7 @@ let game = {
     adBoostActive: false, adBoostEndTime: 0, adBoostMultiplier: 2,
     glanzsternBoostActive: false, glanzsternBoostEndTime: 0, glanzsternBoostMultiplier: 5, glanzsternBoostCost: 5,
     buildings: {
+        // FIX: Initial GPS auf 0 gesetzt
         wichtel: { name: "Wichtel", cost: 15, count: 0, icon: "🧑‍🎄", baseGps: 0.5, gpsGrowthRate: 1.07, gps: 0 },
         maschine: { name: "Maschine", cost: 100, count: 0, icon: "⚙️", baseGps: 4, gpsGrowthRate: 1.07, gps: 0 },
         rentier: { name: "Rentier", cost: 1100, count: 0, icon: "🦌", baseGps: 12, gpsGrowthRate: 1.07, gps: 0 },
@@ -319,12 +330,12 @@ function saveGame(notify) {
     for(let k in game.buildings) save.buildings[k] = game.buildings[k].count;
     for(let k in game.availableUpgrades) save.upgrades[k] = game.availableUpgrades[k].purchased;
     for(let k in game.glanzsterneUpgrades) save.glanz_ups[k] = game.glanzsterneUpgrades[k].purchased;
-    localStorage.setItem('xmasClickerV15', JSON.stringify(save));
+    localStorage.setItem('xmasClickerV16', JSON.stringify(save));
     if(notify) alert("Gespeichert!");
 }
 
 function loadGame() {
-    let data = localStorage.getItem('xmasClickerV15');
+    let data = localStorage.getItem('xmasClickerV16');
     if(!data) return;
     let s = JSON.parse(data);
     
@@ -362,7 +373,7 @@ function loadGame() {
 
 function resetGamePrompt() {
     if(confirm("Wirklich alles löschen?")) {
-        localStorage.removeItem('xmasClickerV15'); location.reload();
+        localStorage.removeItem('xmasClickerV16'); location.reload();
     }
 }
 
@@ -392,12 +403,23 @@ function recalculateGps() {
 }
 
 function clickAction(e) {
-    if(e) e.preventDefault();
+    // Verhindert Standardverhalten und Bubbling
+    if(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
     let mult = 1;
     for(let u in game.availableUpgrades) if(game.availableUpgrades[u].purchased && game.availableUpgrades[u].target === 'click') mult *= game.availableUpgrades[u].effect;
     let prestigeMult = 1 + (game.prestigePoints * 0.05);
     let produced = game.clickPower * mult * prestigeMult;
-    game.geschenke += produced; game.totalGeschenkeEver += produced;
+    
+    game.geschenke += produced; 
+    game.totalGeschenkeEver += produced;
+    
+    // Vibration Feedback
+    if(navigator.vibrate) navigator.vibrate(5);
+    
     updateUI();
 }
 
@@ -517,6 +539,7 @@ function updateUI() {
     document.getElementById('gps-display').innerText = game.gps.toFixed(1);
     document.getElementById('prestige-display').innerText = game.prestigePoints.toLocaleString();
     document.getElementById('glanzsterne-display').innerText = game.glanzsterne.toLocaleString();
+    
     document.getElementById('gps-info').innerText = game.gps.toFixed(1);
     document.getElementById('total-geschenke').innerText = Math.floor(game.totalGeschenkeEver).toLocaleString();
     document.getElementById('ghosts-available').innerText = game.prestigePoints.toLocaleString();
